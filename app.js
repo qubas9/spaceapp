@@ -17,7 +17,12 @@ async function loadData(parameter, longitude, latitude) {
     const url = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=${parameter}&community=SB&longitude=${longitude}&latitude=${latitude}&start=19810101&end=20260201&format=JSON`;
     try {
         const response = await fetch(url);
-        if (!response.ok) throw new Error('Error loading data: ' + response.statusText);
+        if (!response.ok) {
+            if (response.status === 422) {
+                return 'Error 422: Invalid request. Please check the coordinates or try a different location.';
+            }
+            throw new Error('Error loading data: ' + response.statusText);
+        }
         const json = await response.json();
         const data = json.properties.parameter[parameter];
         let inDayData = {};
@@ -31,6 +36,7 @@ async function loadData(parameter, longitude, latitude) {
         }
         return inDayData;
     } catch (error) {
-        return 'Error loading data: ' + error;
+        console.warn(error);
+        return 'Error loading data';
     }
 }
