@@ -1,22 +1,36 @@
 // Fetch NASA POWER API data and display it
-const output = document.getElementById('output');
-let inDayData = {};
 
-fetch('https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M&community=SB&longitude=0&latitude=0&start=19810101&end=20260201&format=JSON')
-  .then(response => response.json())
-  .then(data => {
-    // Display the JSON data in a readable format
-    data = data.properties.parameter.T2M;
-    for (date in data) {
-        if (data[date] == -900) continue;
-            day =  date.slice(4);
+async function T2MAverage(latitude, longitude) {
+    const Data = await loadData('T2M', longitude, latitude);
+    if (!Data || typeof Data === 'string') return Data; // error string
+    const avgDayData = {};
+    for (const day in Data) {
+        const values = Data[day];
+        const sum = values.reduce((a, b) => a + b, 0);
+        avgDayData[day] = sum / values.length;
+    }
+    return avgDayData;
+}
+
+
+async function loadData(parameter, longitude, latitude) {
+    const url = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=${parameter}&community=SB&longitude=${longitude}&latitude=${latitude}&start=19810101&end=20260201&format=JSON`;
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error('Error loading data: ' + response.statusText);
+        const json = await response.json();
+        const data = json.properties.parameter[parameter];
+        let inDayData = {};
+        for (let date in data) {
+            if (data[date] === -999) continue; // Skip missing data
+            let day = date.slice(4);
             if (!inDayData[day]) {
                 inDayData[day] = [];
             }
             inDayData[day].push(data[date]);
+        }
+        return inDayData;
+    } catch (error) {
+        return 'Error loading data: ' + error;
     }
-    output.textContent = JSON.stringify(inDayData);
-})
-  .catch(error => {
-    output.textContent = 'Error loading data: ' + error;
-  });
+}
