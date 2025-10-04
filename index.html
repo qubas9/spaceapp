@@ -5,13 +5,31 @@
   <title>Leaflet Map Click as Input</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    #map { height: 375px; width: 600px ; margin-top: 20px; margin-left: 25px; margin-right: 5px; margin-bottom: 20px; border-style: solid; }
+    #map { height: 375px; width: 600px ; margin-top: 20px; margin-left: 5px; margin-right: 5px; margin-bottom: 20px; border-style: solid; }
     label, input { margin: 5px; }
-   
+   h1 { font-size: 32px;
+  font-weight: bold;
+  text-align: center;
+ border-style:solid;
+
+   }
+    h2 {
+  font-size: 28px;
+  font-weight: bold;
+  text-align: left;
+  margin-top: 20px;
+}
+
+
+  
   </style>
 </head>
 <body>
+
+  <h1>  All 1225 Raindrops </h1>
+
   <h2> Click on the Map to Select a Location </h2>
+ 
 
   <label>Latitude: <input type="text" id="lat" readonly /></label>
   <label>Longitude: <input type="text" id="lng" readonly /></label>
@@ -25,8 +43,7 @@
   <script>
     // Initial map centered on a default location (e.g., New York)
     const map = L.map('map').setView([0, 0], 1);
-    let latestLat = 0;
-    let latestLng = 0;
+
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
@@ -37,19 +54,16 @@
 
     // Function to update the input fields (async)
     async function updateInputs(lat, lng) {
-        lat = Math.round(lat * 2) / 2;
-        lng = Math.round(lng * 2) / 2;
-        if (lat === latestLat && lng === latestLng) return; // No change
-        latestLat = lat;
-        latestLng = lng;
       document.getElementById("lat").value = lat.toFixed(6);
       document.getElementById("lng").value = lng.toFixed(6);
       const tempElem = document.getElementById("temp");
       tempElem.textContent = 'Loading...';
-      const result = await Distribution('T2M', lat, lng, 10, 1);
-      
+      const result = await T2MAverage(lat, lng);
+      if (typeof result === 'string') {
+        tempElem.textContent = result;
+      } else {
         tempElem.textContent = JSON.stringify(result);
-      
+      }
     }
 
     // On map click, move marker and update inputs
