@@ -44,7 +44,7 @@
       document.getElementById("lng").value = lng.toFixed(6);
       const tempElem = document.getElementById("temp");
       tempElem.textContent = 'Loading...';
-      const result = await T2MAverage(lat, lng);
+      const result = await Distribution('T2M', lat, lng, 10, 1);
       
         tempElem.textContent = JSON.stringify(result);
       
