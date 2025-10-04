@@ -37,22 +37,24 @@
   <p>Temperature: <p id="temp"></p> </label>
 
   <div id="map"></div>
-
+ <canvas id="myChart"></canvas>
+ <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="app.js"></script>
   <script>
     // Initial map centered on a default location (e.g., New York)
     const map = L.map('map').setView([0, 0], 1);
-
     // Add OpenStreetMap tiles
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
+        attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
-
+    
     // Marker (will be updated on click)
     let marker = L.marker([0, 0], { draggable: true }).addTo(map);
-
+    
     // Function to update the input fields (async)
+    let latestLat = 0;
+    let latestLng = 0;
     async function updateInputs(lat, lng) {
         lat = (lat)%90
         lng = ((lng + 180) % 360 + 360) % 360 - 180;
@@ -63,10 +65,29 @@
       document.getElementById("lng").value = lng.toFixed(6);
       const tempElem = document.getElementById("temp");
       tempElem.textContent = 'Loading...';
-      const result = await Average('T2M', lat, lng, 10, 1,12);
+      const values = await dayData('T2M', lat, lng, 10, 1,12);
+        const result = await Average('T2M', lat, lng, 10, 1,12,values);
 
-        tempElem.textContent = Math.round((result*(9/5)+32)*2)/2+" °F\n"+ result +" °C\n"+Math.round((result+273.15)*2)/2+" K";
+        tempElem.textContent = Math.round((result*(9/5)+32)*2)/2+" °F\n"+ Math.round(result*2)/2 +" °C\n"+Math.round((result+273.15)*2)/2+" K";
+          const ctx = document.getElementById('myChart');
+        let data = Distribution('T2M', lat, lng, 10, 1,12,values);
+        
 
+       
+        var config = {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Graph Line',
+                data: data,
+                backgroundColor: 'rgba(0, 119, 204, 0.3)'
+            }]
+        }
+};
+
+var chart = new Chart(ctx, config);
+   
     }
 
     // On map click, move marker and update inputs

@@ -1,10 +1,9 @@
 // Fetch NASA POWER API data and display it
 
-async function Average(parameter,latitude, longitude,month,day,hour) {
+async function Average(parameter,latitude, longitude,month,day,hour,values) {
 
-    const values = await dayData(parameter, latitude, longitude, month, day,hour);
+    if (!values ) values =await dayData(parameter, latitude, longitude, month, day,hour); // error string
     if (!values || typeof values === 'string') return values; // error string
-    
    
     const sum = values.reduce((a, b) => a + b, 0);
     let avgDayData = sum / values.length;
@@ -41,11 +40,12 @@ async function loadData(parameter, longitude, latitude) {
     }
 }
 
-async function Distribution(parameter,latitude, longitude,month,day,hour) {
+async function Distribution(parameter,latitude, longitude,month,day,hour,values) {
       
+      if (!values ) values =await dayData(parameter, latitude, longitude, month, day,hour); // error string
+      if (!values || typeof values === 'string') return values; // error string
 
       const distribution = {};
-      const values = await dayData(parameter, latitude, longitude, month, day,hour);
         for (const value of values) {
           const rounded = Math.round(value*2)/2;
           distribution[rounded] = (distribution[rounded] || 0) + 1;
