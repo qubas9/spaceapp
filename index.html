@@ -5,15 +5,17 @@
   <title>Leaflet Map Click as Input</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    #map { height: 400px; margin-top: 10px; }
+    #map { height: 375px; width: 600px ; margin-top: 20px; margin-left: 25px; margin-right: 5px; margin-bottom: 20px; border-style: solid; }
     label, input { margin: 5px; }
+   
   </style>
 </head>
 <body>
-  <h3>Click on the Map to Select a Location</h3>
+  <h2> Click on the Map to Select a Location </h2>
 
   <label>Latitude: <input type="text" id="lat" readonly /></label>
   <label>Longitude: <input type="text" id="lng" readonly /></label>
+  
   <p>Temperature: <p id="temp"></p> </label>
 
   <div id="map"></div>
