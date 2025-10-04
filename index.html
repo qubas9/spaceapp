@@ -37,8 +37,8 @@
 
     // Function to update the input fields (async)
     async function updateInputs(lat, lng) {
-        lat = Math.round(lat * 2) / 2;
-        lng = Math.round(lng * 2) / 2;
+        lat = (lat)%90
+        lng = ((lng + 180) % 360 + 360) % 360 - 180;
         if (lat === latestLat && lng === latestLng) return; // No change
         latestLat = lat;
         latestLng = lng;
@@ -46,10 +46,10 @@
       document.getElementById("lng").value = lng.toFixed(6);
       const tempElem = document.getElementById("temp");
       tempElem.textContent = 'Loading...';
-      const result = await Distribution('T2M', lat, lng, 10, 1);
-      
-        tempElem.textContent = JSON.stringify(result);
-      
+      const result = await Average('T2M', lat, lng, 10, 1,12);
+
+        tempElem.textContent = Math.round((result*(9/5)+32)*2)/2+" °F\n"+ result +" °C\n"+Math.round((result+273.15)*2)/2+" K";
+
     }
 
     // On map click, move marker and update inputs
