@@ -1,14 +1,14 @@
 // Fetch NASA POWER API data and display it
 
-async function T2MAverage(latitude, longitude) {
-    const Data = await loadData('T2M', longitude, latitude);
-    if (!Data || typeof Data === 'string') return Data; // error string
+async function Average(parameter,latitude, longitude,month,day) {
+
+    const values = await dayData(parameter, latitude, longitude, month, day);
+    if (!values || typeof values === 'string') return values; // error string
     const avgDayData = {};
-    for (const day in Data) {
-        const values = Data[day];
-        const sum = values.reduce((a, b) => a + b, 0);
-        avgDayData[day] = sum / values.length;
-    }
+   
+    const sum = values.reduce((a, b) => a + b, 0);
+    avgDayData[day] = sum / values.length;
+
     return avgDayData;
 }
 
@@ -17,7 +17,12 @@ async function loadData(parameter, longitude, latitude) {
     const url = `https://power.larc.nasa.gov/api/temporal/daily/point?parameters=${parameter}&community=SB&longitude=${longitude}&latitude=${latitude}&start=19810101&end=20260201&format=JSON`;
     try {
         const response = await fetch(url);
-        if (!response.ok) throw new Error('Error loading data: ' + response.statusText);
+        if (!response.ok) {
+            if (response.status === 422) {
+                return 'Error 422: Invalid request. Please check the coordinates or try a different location.';
+            }
+            throw new Error('Error loading data: ' + response.statusText);
+        }
         const json = await response.json();
         const data = json.properties.parameter[parameter];
         let inDayData = {};
@@ -31,6 +36,39 @@ async function loadData(parameter, longitude, latitude) {
         }
         return inDayData;
     } catch (error) {
-        return 'Error loading data: ' + error;
+        console.warn(error);
+        return 'Error loading data';
     }
+}
+
+async function Distribution(parameter,latitude, longitude,month,day) {
+      
+
+      const distribution = {};
+      const values = await dayData(parameter, latitude, longitude, month, day);
+        for (const value of values) {
+          const rounded = Math.round(value*2)/2;
+          distribution[rounded] = (distribution[rounded] || 0) + 1;
+        }
+      
+      return distribution;
+}
+
+async function dayData(parameter,latitude, longitude,month,day) {
+    day = day.toString();
+      month = month.toString();
+      if (!month || !day) new Error('Month and day are required');
+
+      if (day.length===1) day='0'+day;
+      if (month.length===1) month='0'+month;
+      data = await loadData(parameter, longitude, latitude);
+
+      if (!data || typeof data === 'string') return data; // error string
+
+      // Check if the day exists in the data
+      if (!data[month + day]) {
+        return `No data available for the specified month (${month}) and day (${day}).`;
+      }
+      const values = data[month + day];
+      return values;
 }
