@@ -1,120 +1,203 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <title>Leaflet Map Click as Input</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    body {background-color:rgb(144, 174, 184)
+    body {
+      background-color: rgb(144, 174, 184);
+      font-family: Arial, sans-serif;
     }
-        #panel {
-      display: none; /* Initially hidden */
+
+    #panel {
+      display: none;
       margin-top: 10px;
       padding: 10px;
       background-color: lightblue;
       border: 1px solid #0a0a0a;
       width: 400px;
-      margin-left: 1450px;
+      position: absolute;
+      right: 20px;
+      top: 120px;
     }
 
-
-  
-}
     .container {
       display: flex;
-      justify-content: space-between; /* pushes items to opposite sides */
+      flex-direction: column;
+      align-items: center;
       padding: 20px;
     }
- .box1{
-      width: 25%;
-      height:fit-content
+
+    .box1 {
+      width: 90%;
+      max-width: 800px;
       padding: 10px;
-      border: 1px solid #ccc;
-      background-color: lightblue;
-      
-      margin-bottom: 5px;
-       max-height: 60px;
- }
-       .box2{
-      width: 25%;
-      padding: 10px;
-      border: 1px solid #ccc;
+      border: 1px solid #000000;
       background-color: lightblue;
       margin-bottom: 5px;
-      
- }
-    #map { height: 375px; width: 600px ; margin-top: 20px; margin-left: 5px; margin-right: 5px; margin-bottom: 20px; border-style: solid; }
-    label, input { margin: 5px; }
-   h1 { font-size: 32px;
-  font-weight: bold;
-  text-align: center;
- border-style:solid;
- background-color:lightblue;
+      text-align: center;
+    }
 
+    #map {
+      height: 375px;
+      width: 600px;
+      margin: 20px 5px;
+      border: 1px solid black;
+    }
 
-   }
+    label, input, select {
+      margin: 5px;
+      font-size: 16px;
+    }
+
+    h1 {
+      font-size: 32px;
+      font-weight: bold;
+      text-align: center;
+      border: 1px solid black;
+      background-color: lightblue;
+      padding: 10px;
+    }
+
     h2 {
-  font-size: 28px;
-  font-weight: bold;
-  text-align: left;
-  margin-top: 20px;
-  margin-bottom: 30px;
- 
-}
-h3  {
-  font-size: 20px;
-  text-align: left;
-  
+      font-size: 28px;
+      font-weight: bold;
+      text-align: center;
+      margin: 10px 0 30px 0;
+      background-color: lightblue;
+      padding: 10px;
+    }
 
+    h3 {
+      font-size: 20px;
+      text-align: left;
+    }
 
-}
+    .flip {
+      cursor: pointer;
+      font-weight: bold;
+      background-color: lightblue;
+      border: 1px solid #0a0a0a;
+      padding: 10px;
+      width: fit-content;
+      align-self: flex-end;
+      margin-right: 20px;
+      margin-top: -30px;
+    }
 
+    #temp {
+      display: inline;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
 
-  
+  <h1>All 1225 Raindrops</h1>
 
-  <h1>  All 1225 Raindrops </h1>
+  <div class="container">
 
- <div class="container">
-    <div class="box1"><h2> Click on the Map to Select a Location </h2></div>
+    <div class="box1">
+      <h2>Click on the Map to Select a Location</h2>
+    </div>
 
-  <p class="flip" onclick="showhide()" style="margin-left: 1650px;
-  border-style: solid; border-color: #0a0a0a;font-weight: bold;margin-top: -50px;background-color: lightblue; "
-  >About Us (Click)</p>
-  <div id="panel">
-  <p style= border-color:#0a0a0a;margin-top: -15px ">This website was created as a apart of the Nasa Space Apps Challenge, "Will It Rain on My Parade?". The goal of this website is to provide users with
- a reliable tool to give them an idea of the weather conditions at a certain point in the future based on a Month and Day. This information is presented based on data
-  from NASA sources and provided API.</p>
-  
-</div>
+    <!-- Dropdowns -->
+    <div>
+      <label for="month">Month:</label>
+      <select id="month" onchange="updateDays()">
+        <option value="1">January</option>
+        <option value="2">February</option>
+        <option value="3">March</option>
+        <option value="4">April</option>
+        <option value="5">May</option>
+        <option value="6">June</option>
+        <option value="7">July</option>
+        <option value="8">August</option>
+        <option value="9">September</option>
+        <option value="10">October</option>
+        <option value="11">November</option>
+        <option value="12">December</option>
+      </select>
+
+      <label for="day">Day:</label>
+      <select id="day"></select>
+
+      <label for="hour">Hour:</label>
+      <select id="hour"></select>
+    </div>
+
+    <!-- Click to show panel -->
+    <p class="flip" onclick="showhide()">About Us (Click)</p>
+
+    <!-- Hidden panel -->
+    <div id="panel">
+      <p>
+        This website was created as part of the NASA Space Apps Challenge, "Will It Rain on My Parade?".<br><br>
+        The goal of this website is to provide users with a reliable tool to give them an idea of the weather conditions at a certain point in the future based on a month and day. This information is presented based on data from NASA sources and provided APIs.
+      </p>
+    </div>
+
+    <!-- Coordinate and temperature display -->
+    <div>
+      <label>Latitude: <input type="text" id="lat" readonly /></label>
+      <label>Longitude: <input type="text" id="lng" readonly /></label>
+      <p>Temperature: <span id="temp"></span></p>
+    </div>
+
+    <!-- Map -->
+    <div id="map"></div>
 
   </div>
 
-
-  
- 
   <script>
-    // ALlows clicking box to appear and disappear//
+    // Show/hide "About Us" panel
     function showhide() {
-      let x = document.getElementById("panel");
-      if (x.style.display === "none" || x.style.display === "") {
-        x.style.display = "block";
-      } else {
-        x.style.display = "none";
+      const x = document.getElementById("panel");
+      x.style.display = (x.style.display === "none" || x.style.display === "") ? "block" : "none";
+    }
+
+    // Populate days based on month
+    function updateDays() {
+      const month = parseInt(document.getElementById('month').value);
+      const daySelect = document.getElementById('day');
+      daySelect.innerHTML = '';
+
+      let daysInMonth = 31;
+      if ([4, 6, 9, 11].includes(month)) {
+        daysInMonth = 30;
+      } else if (month === 2) {
+        daysInMonth = 28; // No leap year logic for now
+      }
+
+      for (let i = 1; i <= daysInMonth; i++) {
+        const option = document.createElement('option');
+        option.value = i;
+        option.textContent = i;
+        daySelect.appendChild(option);
       }
     }
+
+    // Populate hours on page load
+    function populateHours() {
+      const hourSelect = document.getElementById('hour');
+      for (let h = 0; h < 24; h++) {
+        const option = document.createElement('option');
+        option.value = h;
+        option.textContent = h.toString().padStart(2, '0') + ":00";
+        hourSelect.appendChild(option);
+      }
+    }
+
+    // Init dropdowns on page load
+    window.onload = function () {
+      updateDays();
+      populateHours();
+    };
   </script>
 
-  <label>Latitude: <input type="text" id="lat" readonly /></label>
-  <label>Longitude: <input type="text" id="lng" readonly /></label>
-  
-  <p>Average temperature: <p id="temp"></p> </label>
 
- 
-  <div id="map"></div>
-   
+
   
  <canvas id="myChart" width="600" height="400"></canvas>
     <canvas id="myChart2" width="600" height="400"></canvas>
