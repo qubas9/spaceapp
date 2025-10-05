@@ -142,7 +142,7 @@
     <div>
       <label>Latitude: <input type="text" id="lat" readonly /></label>
       <label>Longitude: <input type="text" id="lng" readonly /></label>
-      <p>Temperature: <span id="temp"></span></p>
+      <p>Average Temperature: <span id="temp"></span></p>
     </div>
 
     <!-- Map -->
@@ -229,8 +229,11 @@
       document.getElementById("lng").value = lng.toFixed(6);
       const tempElem = document.getElementById("temp");
       tempElem.textContent = 'Loading...';
-     
-      let dataObj = await distribution(await dayData('CLOUD_AMT', lat, lng, 10, 1,12));
+        const month = document.getElementById('month').value;
+        const day = document.getElementById('day').value;
+        const hour = document.getElementById('hour').value;
+
+      let dataObj = await distribution(await dayData('CLOUD_AMT', lat, lng, month, day, hour));
       // Sort dataObj by key (label) ascending
       const ctx = document.getElementById('myChart');
       let sortedEntries = Object.entries(dataObj).sort(([a], [b]) => a.localeCompare(b, undefined, {numeric: true}));
@@ -260,7 +263,7 @@
         window.myChartInstance = new Chart(ctx, config);
         
         const ctx2 = document.getElementById('myChart2');
-        dataObj = await distribution(await dayData('PRECTOTCORR', lat, lng, 10, 1,12));
+        dataObj = await distribution(await dayData('PRECTOTCORR', lat, lng, month, day, hour));
         // Sort dataObj by key (label) ascending
         sortedEntries = Object.entries(dataObj).sort(([a], [b]) => a.localeCompare(b, undefined, {numeric: true}));
         labels = sortedEntries.map(([label]) => label);
@@ -287,9 +290,9 @@
             window.myChartInstance2.destroy();
         }
         window.myChartInstance2 = new Chart(ctx2, config);
-        const result = await average(await dayData('T2M', lat, lng, 10, 1,12));
-    
-        tempElem.innerHTML =  Math.round(result*2)/2 +" °C<br>"+Math.round((result*(9/5)+32)*2)/2+" °F<br>"+Math.round((result+273.15)*2)/2+" K";
+        const result = await average(await dayData('T2M', lat, lng, month, day, hour));
+
+        tempElem.innerHTML =  "<br>" + Math.round(result*2)/2 +" °C<br>"+Math.round((result*(9/5)+32)*2)/2+" °F<br>"+Math.round((result+273.15)*2)/2+" K";
     }
 
     // On map click, move marker and update inputs
