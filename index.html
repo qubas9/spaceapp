@@ -51,11 +51,12 @@ margin-left: 1600px;"> This website was created as a apart of the Nasa Space App
   <label>Latitude: <input type="text" id="lat" readonly /></label>
   <label>Longitude: <input type="text" id="lng" readonly /></label>
   
-  <p>Temperature: <p id="temp"></p> </label>
+  <p>Average temperature: <p id="temp"></p> </label>
 
  
   <div id="map"></div>
- <canvas id="myChart"></canvas>
+    <canvas id="myChart" width="600" height="400"></canvas>
+    <canvas id="myChart2" width="600" height="400"></canvas>
  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
    
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
@@ -75,7 +76,7 @@ margin-left: 1600px;"> This website was created as a apart of the Nasa Space App
     let latestLat = 0;
     let latestLng = 0;
     async function updateInputs(lat, lng) {
-        lat = (lat)%90
+        lat = (lat)
         lng = ((lng + 180) % 360 + 360) % 360 - 180;
         if (lat === latestLat && lng === latestLng) return; // No change
         latestLat = lat;
@@ -84,29 +85,67 @@ margin-left: 1600px;"> This website was created as a apart of the Nasa Space App
       document.getElementById("lng").value = lng.toFixed(6);
       const tempElem = document.getElementById("temp");
       tempElem.textContent = 'Loading...';
-      const values = await dayData('T2M', lat, lng, 10, 1,12);
-        const result = await Average('T2M', lat, lng, 10, 1,12,values);
+     
+      let dataObj = await distribution(await dayData('CLOUD_AMT', lat, lng, 10, 1,12));
+      // Sort dataObj by key (label) ascending
+      const ctx = document.getElementById('myChart');
+      let sortedEntries = Object.entries(dataObj).sort(([a], [b]) => a.localeCompare(b, undefined, {numeric: true}));
+      let labels = sortedEntries.map(([label]) => label);
+      let data = sortedEntries.map(([, value]) => value);
+      let sum = data.reduce((a, b) => a + b, 0);
+      data = data.map(x => Math.round((x / sum)*10000)/100);
+      console.log(labels, data);
+      
+      // Destroy previous chart if exists
 
-        tempElem.textContent = Math.round((result*(9/5)+32)*2)/2+" °F\n"+ Math.round(result*2)/2 +" °C\n"+Math.round((result+273.15)*2)/2+" K";
-          const ctx = document.getElementById('myChart');
-        let data = Distribution('T2M', lat, lng, 10, 1,12,values);
-        
-
-       
         var config = {
-        type: 'bar',
-        data: {
-            labels: labels,
+            type: 'bar',
+            data: {
+                labels: labels,
             datasets: [{
-                label: 'Graph Line',
+                label: 'Probability of cloud coverage (%)',
                 data: data,
                 backgroundColor: 'rgba(0, 119, 204, 0.3)'
             }]
         }
-};
-
-var chart = new Chart(ctx, config);
-   
+    };
+    
+    if (window.myChartInstance) {
+        window.myChartInstance.destroy();
+    }
+        window.myChartInstance = new Chart(ctx, config);
+        
+        const ctx2 = document.getElementById('myChart2');
+        dataObj = await distribution(await dayData('PRECTOTCORR', lat, lng, 10, 1,12));
+        // Sort dataObj by key (label) ascending
+        sortedEntries = Object.entries(dataObj).sort(([a], [b]) => a.localeCompare(b, undefined, {numeric: true}));
+        labels = sortedEntries.map(([label]) => label);
+        data = sortedEntries.map(([, value]) => value);
+        sum = data.reduce((a, b) => a + b, 0);
+        data = data.map(x => Math.round((x / sum)*10000)/100);
+        console.log(labels, data);
+        
+        // Destroy previous chart if exists
+        
+        var config = {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Probability of total precipitable water (mm)',
+                    data: data,
+                    backgroundColor: 'rgba(0, 119, 204, 0.3)'
+                }]
+            }
+        };
+        
+        if (window.myChartInstance2) {
+            window.myChartInstance2.destroy();
+        }
+        window.myChartInstance2 = new Chart(ctx2, config);
+        const result = await average(await dayData('T2M', lat, lng, 10, 1,12));
+    
+        tempElem.innerHTML =  Math.round(result*2)/2 +" °C<br>"+Math.round((result*(9/5)+32)*2)/2+" °F<br>"+Math.round((result+273.15)*2)/2+" K";
     }
 
     // On map click, move marker and update inputs

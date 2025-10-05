@@ -1,8 +1,8 @@
 // Fetch NASA POWER API data and display it
 
-async function Average(parameter,latitude, longitude,month,day,hour,values) {
+async function average(values) {
 
-    if (!values ) values =await dayData(parameter, latitude, longitude, month, day,hour); // error string
+
     if (!values || typeof values === 'string') return values; // error string
    
     const sum = values.reduce((a, b) => a + b, 0);
@@ -13,7 +13,7 @@ async function Average(parameter,latitude, longitude,month,day,hour,values) {
 
 
 async function loadData(parameter, longitude, latitude) {
-    const url = `https://power.larc.nasa.gov/api/temporal/hourly/point?parameters=${parameter}&community=SB&longitude=${longitude}&latitude=${latitude}&start=20010101&end=30000102&format=JSON`;
+    const url = `https://power.larc.nasa.gov/api/temporal/hourly/point?parameters=${parameter}&community=SB&longitude=${longitude}&latitude=${latitude}&start=20010101&end=30000102&format=JSON`;//81
     try {
         const response = await fetch(url);
         if (!response.ok) {
@@ -40,9 +40,9 @@ async function loadData(parameter, longitude, latitude) {
     }
 }
 
-async function Distribution(parameter,latitude, longitude,month,day,hour,values) {
+async function distribution(values) {
       
-      if (!values ) values =await dayData(parameter, latitude, longitude, month, day,hour); // error string
+      
       if (!values || typeof values === 'string') return values; // error string
 
       const distribution = {};
